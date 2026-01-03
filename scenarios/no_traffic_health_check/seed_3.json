@@ -1,0 +1,5 @@
+{
+  "horizon": 20,
+  "capacity_per_step": 3,
+  "events": {}
+}

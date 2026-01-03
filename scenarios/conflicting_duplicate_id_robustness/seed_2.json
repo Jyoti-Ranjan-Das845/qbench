@@ -1,0 +1,1 @@
+{"horizon":20,"capacity_per_step":3,"events":{"1":[{"type":"arrival","task":{"id":"u1","arrival_time":1,"priority":"urgent","deadline":3}}],"5":[{"type":"arrival","task":{"id":"conf2","arrival_time":5,"priority":"routine","deadline":19}}],"7":[{"type":"arrival","task":{"id":"conf2","arrival_time":7,"priority":"urgent","deadline":9}}]}}

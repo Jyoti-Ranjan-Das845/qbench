@@ -1,0 +1,546 @@
+{
+  "horizon": 20,
+  "capacity_per_step": 3,
+  "events": {
+    "1": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r1",
+          "arrival_time": 1,
+          "priority": "routine",
+          "deadline": 19
+        }
+      }
+    ],
+    "2": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r2",
+          "arrival_time": 2,
+          "priority": "routine",
+          "deadline": 19
+        }
+      }
+    ],
+    "3": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r3",
+          "arrival_time": 3,
+          "priority": "routine",
+          "deadline": 19
+        }
+      }
+    ],
+    "4": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r4",
+          "arrival_time": 4,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r5",
+          "arrival_time": 4,
+          "priority": "routine",
+          "deadline": 19
+        }
+      }
+    ],
+    "5": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r6",
+          "arrival_time": 5,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r7",
+          "arrival_time": 5,
+          "priority": "routine",
+          "deadline": 19
+        }
+      }
+    ],
+    "6": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r8",
+          "arrival_time": 6,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r9",
+          "arrival_time": 6,
+          "priority": "routine",
+          "deadline": 19
+        }
+      }
+    ],
+    "7": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r10",
+          "arrival_time": 7,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r11",
+          "arrival_time": 7,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u1",
+          "arrival_time": 7,
+          "priority": "urgent",
+          "deadline": 9
+        }
+      }
+    ],
+    "8": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r12",
+          "arrival_time": 8,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r13",
+          "arrival_time": 8,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u2",
+          "arrival_time": 8,
+          "priority": "urgent",
+          "deadline": 10
+        }
+      }
+    ],
+    "9": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r14",
+          "arrival_time": 9,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r15",
+          "arrival_time": 9,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u3",
+          "arrival_time": 9,
+          "priority": "urgent",
+          "deadline": 11
+        }
+      }
+    ],
+    "10": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r16",
+          "arrival_time": 10,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r17",
+          "arrival_time": 10,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u4",
+          "arrival_time": 10,
+          "priority": "urgent",
+          "deadline": 12
+        }
+      }
+    ],
+    "11": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r18",
+          "arrival_time": 11,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r19",
+          "arrival_time": 11,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r20",
+          "arrival_time": 11,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u5",
+          "arrival_time": 11,
+          "priority": "urgent",
+          "deadline": 13
+        }
+      }
+    ],
+    "12": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r21",
+          "arrival_time": 12,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r22",
+          "arrival_time": 12,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r23",
+          "arrival_time": 12,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u6",
+          "arrival_time": 12,
+          "priority": "urgent",
+          "deadline": 14
+        }
+      }
+    ],
+    "13": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r24",
+          "arrival_time": 13,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r25",
+          "arrival_time": 13,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r26",
+          "arrival_time": 13,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u7",
+          "arrival_time": 13,
+          "priority": "urgent",
+          "deadline": 15
+        }
+      }
+    ],
+    "14": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r27",
+          "arrival_time": 14,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r28",
+          "arrival_time": 14,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r29",
+          "arrival_time": 14,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u8",
+          "arrival_time": 14,
+          "priority": "urgent",
+          "deadline": 16
+        }
+      }
+    ],
+    "15": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r30",
+          "arrival_time": 15,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r31",
+          "arrival_time": 15,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r32",
+          "arrival_time": 15,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u9",
+          "arrival_time": 15,
+          "priority": "urgent",
+          "deadline": 17
+        }
+      }
+    ],
+    "16": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r33",
+          "arrival_time": 16,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r34",
+          "arrival_time": 16,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r35",
+          "arrival_time": 16,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r36",
+          "arrival_time": 16,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u10",
+          "arrival_time": 16,
+          "priority": "urgent",
+          "deadline": 18
+        }
+      }
+    ],
+    "17": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r37",
+          "arrival_time": 17,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r38",
+          "arrival_time": 17,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r39",
+          "arrival_time": 17,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r40",
+          "arrival_time": 17,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u11",
+          "arrival_time": 17,
+          "priority": "urgent",
+          "deadline": 19
+        }
+      }
+    ],
+    "18": [
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r41",
+          "arrival_time": 18,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r42",
+          "arrival_time": 18,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r43",
+          "arrival_time": 18,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "r44",
+          "arrival_time": 18,
+          "priority": "routine",
+          "deadline": 19
+        }
+      },
+      {
+        "type": "arrival",
+        "task": {
+          "id": "u12",
+          "arrival_time": 18,
+          "priority": "urgent",
+          "deadline": 19
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,252 @@
+{
+  "capacity_per_step": 3,
+  "events": {
+    "1": [
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r1",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r2",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r3",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r4",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r5",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r6",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r7",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 19,
+          "id": "r8",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 4,
+          "id": "u1",
+          "priority": "urgent"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 1,
+          "deadline": 4,
+          "id": "u2",
+          "priority": "urgent"
+        },
+        "type": "arrival"
+      }
+    ],
+    "14": [
+      {
+        "task": {
+          "arrival_time": 14,
+          "deadline": 17,
+          "id": "u5",
+          "priority": "urgent"
+        },
+        "type": "arrival"
+      }
+    ],
+    "2": [
+      {
+        "task": {
+          "arrival_time": 2,
+          "deadline": 19,
+          "id": "r9",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 2,
+          "deadline": 19,
+          "id": "r10",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 2,
+          "deadline": 19,
+          "id": "r11",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 2,
+          "deadline": 19,
+          "id": "r12",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 2,
+          "deadline": 19,
+          "id": "r13",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 2,
+          "deadline": 19,
+          "id": "r14",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 2,
+          "deadline": 5,
+          "id": "u3",
+          "priority": "urgent"
+        },
+        "type": "arrival"
+      }
+    ],
+    "3": [
+      {
+        "task": {
+          "arrival_time": 3,
+          "deadline": 19,
+          "id": "r15",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 3,
+          "deadline": 19,
+          "id": "r16",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 3,
+          "deadline": 19,
+          "id": "r17",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 3,
+          "deadline": 19,
+          "id": "r18",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 3,
+          "deadline": 6,
+          "id": "u4",
+          "priority": "urgent"
+        },
+        "type": "arrival"
+      }
+    ],
+    "4": [
+      {
+        "task": {
+          "arrival_time": 4,
+          "deadline": 19,
+          "id": "r19",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      },
+      {
+        "task": {
+          "arrival_time": 4,
+          "deadline": 19,
+          "id": "r20",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      }
+    ],
+    "9": [
+      {
+        "task": {
+          "arrival_time": 9,
+          "deadline": 19,
+          "id": "r21",
+          "priority": "routine"
+        },
+        "type": "arrival"
+      }
+    ]
+  },
+  "horizon": 20
+}

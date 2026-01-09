@@ -2,9 +2,9 @@
 
 import pytest
 
-from qbench.action import Action
-from qbench.env import QueueEnv
-from qbench.loader import SeedConfig
+from qbench.data_models.action import Action
+from qbench.environment.env import QueueEnv
+from qbench.environment.loader import SeedConfig
 
 
 @pytest.fixture
@@ -75,7 +75,7 @@ def test_env_step_with_noop(simple_config):
     env.reset()
 
     # Step with noop
-    obs, done = env.step([Action(type="noop")])
+    obs, done = env.act([Action(type="noop")])
 
     assert env.time == 1
     assert not done
@@ -89,12 +89,14 @@ def test_env_schedule_task(simple_config):
 
     # Schedule u1 for step 2
     action = Action(type="schedule", task_id="u1", step=2)
-    obs, done = env.step([action])
+    obs, done = env.act([action])
 
-    assert "u1" in env.scheduled
-    assert "u1" not in env.pending
-    assert env.tasks["u1"].status == "scheduled"
-    assert env.tasks["u1"].scheduled_slot == 2
+    uid = env.get_uid("u1")
+    assert uid is not None
+    assert uid in env.scheduled
+    assert uid not in env.pending
+    assert env.tasks[uid].status == "scheduled"
+    assert env.tasks[uid].scheduled_slot == 2
 
 
 def test_env_task_completion(simple_config):
@@ -103,15 +105,17 @@ def test_env_task_completion(simple_config):
     env.reset()
 
     # Schedule u1 for step 1
-    env.step([Action(type="schedule", task_id="u1", step=1)])
+    env.act([Action(type="schedule", task_id="u1", step=1)])
 
     # Step to time 1 - task should complete
-    obs, done = env.step([Action(type="noop")])
+    obs, done = env.act([Action(type="noop")])
 
-    assert "u1" in env.completed
-    assert "u1" not in env.scheduled
-    assert env.tasks["u1"].status == "completed"
-    assert env.tasks["u1"].completed_time == 1
+    uid = env.get_uid("u1")
+    assert uid is not None
+    assert uid in env.completed
+    assert uid not in env.scheduled
+    assert env.tasks[uid].status == "completed"
+    assert env.tasks[uid].completed_time == 1
     assert "u1" in obs.completed_this_step
 
 
@@ -122,11 +126,13 @@ def test_env_reject_task(simple_config):
 
     # Reject r1
     action = Action(type="reject", task_id="r1")
-    obs, done = env.step([action])
+    obs, done = env.act([action])
 
-    assert "r1" in env.rejected
-    assert "r1" not in env.pending
-    assert env.tasks["r1"].status == "rejected"
+    uid = env.get_uid("r1")
+    assert uid is not None
+    assert uid in env.rejected
+    assert uid not in env.pending
+    assert env.tasks[uid].status == "rejected"
 
 
 def test_env_reschedule_task(simple_config):
@@ -135,14 +141,16 @@ def test_env_reschedule_task(simple_config):
     env.reset()
 
     # Schedule u1 for step 2
-    env.step([Action(type="schedule", task_id="u1", step=2)])
+    env.act([Action(type="schedule", task_id="u1", step=2)])
 
     # Reschedule to step 3
-    obs, done = env.step([Action(type="reschedule", task_id="u1", step=3)])
+    obs, done = env.act([Action(type="reschedule", task_id="u1", step=3)])
 
-    assert env.tasks["u1"].scheduled_slot == 3
-    assert "u1" in env.schedule[3]
-    assert "u1" not in env.schedule.get(2, [])
+    uid = env.get_uid("u1")
+    assert uid is not None
+    assert env.tasks[uid].scheduled_slot == 3
+    assert uid in env.schedule[3]
+    assert uid not in env.schedule.get(2, [])
 
 
 def test_env_deadline_miss(simple_config):
@@ -153,12 +161,14 @@ def test_env_deadline_miss(simple_config):
     # Don't schedule u1 (deadline at step 5)
     # Step through time until past deadline
     for _ in range(6):
-        obs, done = env.step([Action(type="noop")])
+        obs, done = env.act([Action(type="noop")])
 
     # u1 should be missed
-    assert "u1" in env.missed
-    assert "u1" not in env.pending
-    assert env.tasks["u1"].status == "missed"
+    uid = env.get_uid("u1")
+    assert uid is not None
+    assert uid in env.missed
+    assert uid not in env.pending
+    assert env.tasks[uid].status == "missed"
 
 
 def test_env_cancel_task(simple_config):
@@ -167,14 +177,16 @@ def test_env_cancel_task(simple_config):
     env.reset()
 
     # Schedule u1
-    env.step([Action(type="schedule", task_id="u1", step=2)])
+    env.act([Action(type="schedule", task_id="u1", step=2)])
 
     # Cancel it
-    obs, done = env.step([Action(type="cancel", task_id="u1")])
+    obs, done = env.act([Action(type="cancel", task_id="u1")])
 
-    assert "u1" in env.cancelled
-    assert "u1" not in env.scheduled
-    assert env.tasks["u1"].status == "cancelled"
+    uid = env.get_uid("u1")
+    assert uid is not None
+    assert uid in env.cancelled
+    assert uid not in env.scheduled
+    assert env.tasks[uid].status == "cancelled"
 
 
 def test_env_episode_completion(simple_config):
@@ -186,7 +198,7 @@ def test_env_episode_completion(simple_config):
     done = False
     steps = 0
     while not done:
-        obs, done = env.step([Action(type="noop")])
+        obs, done = env.act([Action(type="noop")])
         steps += 1
         if steps > 15:  # Safety check
             break
@@ -205,8 +217,8 @@ def test_env_multiple_arrivals(simple_config):
     assert len(obs.pending) == 2
 
     # Step to time 2 where u2 arrives
-    env.step([Action(type="noop")])
-    obs, done = env.step([Action(type="noop")])
+    env.act([Action(type="noop")])
+    obs, done = env.act([Action(type="noop")])
 
     assert len(obs.arrivals) == 1
     assert obs.arrivals[0].id == "u2"

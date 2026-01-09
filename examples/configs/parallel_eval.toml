@@ -1,0 +1,54 @@
+# QBench Parallel Evaluation Configuration
+#
+# This demonstrates high-throughput evaluation with parallel execution.
+# Useful for:
+# - Fast full benchmark runs
+# - Testing agent performance under load
+# - Production evaluation pipelines
+#
+# Run with: qbench eval --config examples/configs/parallel_eval.toml
+#
+# WARNING: High parallelism requires sufficient system resources and
+# may stress-test your purple agent's request handling.
+
+[agents]
+purple_agent_url = "http://localhost:9019"
+green_agent_port = 9018
+
+[evaluation]
+# Run first 10 scenarios with all 3 seeds = 30 episodes
+scenarios = "10"
+seeds = [1, 2, 3]
+
+# Run 10 episodes in parallel
+# This means:
+# - 10 concurrent episode workers
+# - 10 simultaneous requests to your purple agent
+# - Faster completion but higher resource usage
+parallel = 10
+
+# Slightly longer timeout for parallel execution
+timeout = 600
+
+[output]
+output_file = "results/parallel_eval_results.json"
+
+# Minimal output during parallel runs
+verbose = false
+quiet = false  # Still show progress and final results
+
+# Performance Notes:
+# ==================
+# - parallel=1:  Sequential, ~5-10 min for 105 episodes
+# - parallel=10: ~1-2 min for 105 episodes (10x speedup)
+# - parallel=50: ~30-60 sec for 105 episodes (50x speedup)
+#
+# Limitations:
+# - Your agent must handle concurrent requests
+# - System resources (CPU, memory) must support parallelism
+# - Network latency becomes bottleneck at very high parallelism
+#
+# Recommended:
+# - Development/testing: parallel=1 (easier debugging)
+# - CI/CD pipelines: parallel=10-20 (balanced)
+# - Production benchmarks: parallel=50+ (fastest)

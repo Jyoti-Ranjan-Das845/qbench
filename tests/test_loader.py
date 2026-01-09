@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from qbench.loader import ScenarioLoader, SeedConfig
+from qbench.environment.loader import ScenarioLoader, SeedConfig
 
 
 def test_seed_config_validation():
@@ -118,7 +118,7 @@ def test_load_seed_with_deadline_beyond_horizon():
 
 
 def test_load_seed_with_duplicate_task_ids():
-    """Test that duplicate task IDs are caught."""
+    """Test that duplicate task IDs are allowed (handled with UUIDs internally)."""
     with tempfile.TemporaryDirectory() as tmpdir:
         seed_data = {
             "horizon": 20,
@@ -137,7 +137,7 @@ def test_load_seed_with_duplicate_task_ids():
                     {
                         "type": "arrival",
                         "task": {
-                            "id": "task1",  # Duplicate!
+                            "id": "task1",  # Duplicate ID - now allowed
                             "arrival_time": 0,
                             "priority": "routine",
                             "deadline": 15,
@@ -152,8 +152,10 @@ def test_load_seed_with_duplicate_task_ids():
             json.dump(seed_data, f)
 
         loader = ScenarioLoader(tmpdir)
-        with pytest.raises(ValueError, match="Duplicate task ID"):
-            loader.load(seed_file)
+        # Should load successfully - duplicates are handled internally with UUIDs
+        config = loader.load(seed_file)
+        assert config.horizon == 20
+        assert len(config.events["0"]) == 2
 
 
 def test_list_scenarios():

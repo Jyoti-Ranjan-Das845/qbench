@@ -1,0 +1,34 @@
+# Basic QBench Evaluation Configuration
+#
+# This is a simple configuration for evaluating your agent with default settings.
+# Run with: qbench eval --config examples/configs/basic_eval.toml
+#
+# Make sure your purple agent is running first:
+#   python examples/agentbeats/gpt52_purple_agent.py
+
+[agents]
+# Purple agent to test
+purple_agent_url = "http://localhost:9019"
+
+# Green agent (evaluator) - started automatically
+green_agent_port = 9018
+
+[evaluation]
+# Run all scenarios with all seeds (default behavior)
+# This will run all 35 scenarios × 3 seeds = 105 episodes
+scenarios = "all"
+seeds = [1, 2, 3]
+
+# Sequential execution (one episode at a time)
+parallel = 1
+
+# Timeout per episode (seconds)
+timeout = 300
+
+[output]
+# Save results to file
+output_file = "results/basic_eval_results.json"
+
+# Logging verbosity
+verbose = false
+quiet = false

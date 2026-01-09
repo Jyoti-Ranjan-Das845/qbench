@@ -1,0 +1,134 @@
+import sys
+import json
+import asyncio
+from pathlib import Path
+
+# Python 3.10 compatibility
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
+from agentbeats.client import send_message
+from agentbeats.models import EvalRequest
+from a2a.types import (
+    AgentCard,
+    Message,
+    TaskStatusUpdateEvent,
+    TaskArtifactUpdateEvent,
+    Artifact,
+    TextPart,
+    DataPart,
+)
+
+
+def parse_toml(d: dict[str, object]) -> tuple[EvalRequest, str, dict[str, str]]:
+    green = d.get("green_agent")
+    if not isinstance(green, dict) or "endpoint" not in green:
+        raise ValueError("green.endpoint is required in TOML")
+    green_endpoint: str = green["endpoint"]
+
+    parts: dict[str, str] = {}
+    role_to_id: dict[str, str] = {}
+
+    for p in d.get("participants", []):
+        if isinstance(p, dict):
+            role = p.get("role")
+            endpoint = p.get("endpoint")
+            agentbeats_id = p.get("agentbeats_id")
+            if role and endpoint:
+                parts[role] = endpoint
+            if role and agentbeats_id:
+                role_to_id[role] = agentbeats_id
+
+    eval_req = EvalRequest(
+        participants=parts,
+        config=d.get("config", {}) or {}
+    )
+    return eval_req, green_endpoint, role_to_id
+
+def parse_parts(parts) -> tuple[list, list]:
+    text_parts = []
+    data_parts = []
+
+    for part in parts:
+        if isinstance(part.root, TextPart):
+            try:
+                data_item = json.loads(part.root.text)
+                data_parts.append(data_item)
+            except Exception:
+                text_parts.append(part.root.text.strip())
+        elif isinstance(part.root, DataPart):
+            data_parts.append(part.root.data)
+
+    return text_parts, data_parts
+
+def print_parts(parts, task_state: str | None = None):
+    text_parts, data_parts = parse_parts(parts)
+
+    output = []
+    if task_state:
+        output.append(f"[Status: {task_state}]")
+    if text_parts:
+        output.append("\n".join(text_parts))
+    if data_parts:
+        output.extend(json.dumps(item, indent=2) for item in data_parts)
+
+    print("\n".join(output) + "\n")
+
+async def main():
+    if len(sys.argv) < 2:
+        print("Usage: python client_cli.py <scenario.toml> [output.json]")
+        sys.exit(1)
+
+    scenario_path = Path(sys.argv[1])
+    output_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+
+    if not scenario_path.exists():
+        print(f"File not found: {scenario_path}")
+        sys.exit(1)
+
+    toml_data = scenario_path.read_text()
+    data = tomllib.loads(toml_data)
+
+    req, green_url, role_to_id = parse_toml(data)
+
+    msg = req.model_dump_json()
+
+    # Use non-streaming to avoid timeout issues on long-running benchmarks
+    # Green agent will return final results after completing all episodes
+    print("Starting benchmark evaluation...")
+    print("(This may take 35-45 minutes for full 105-episode run)")
+    print()
+
+    result = await send_message(msg, green_url, streaming=False)
+
+    # Handle the response
+    response_text = result.get("response", "")
+    if response_text:
+        print(response_text)
+
+    # Extract artifacts from response if available
+    artifacts: list[Artifact] = []
+    if "artifacts" in result:
+        artifacts = result["artifacts"]
+
+    if output_path:
+        all_data_parts = []
+        for artifact in artifacts:
+            _, data_parts = parse_parts(artifact.parts)
+            all_data_parts.extend(data_parts)
+
+        output_data = {
+            "participants": role_to_id,
+            "results": all_data_parts
+        }
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w") as f:
+            json.dump(output_data, f, indent=2)
+            print(f"Results written to {output_path}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

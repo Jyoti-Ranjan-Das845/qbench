@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from qbench import QueueEnv, ScenarioLoader
-from qbench.loader import SeedConfig
+from qbench.environment.env import QueueEnv
+from qbench.environment.loader import ScenarioLoader, SeedConfig
 
 
 def validate_seed_structure(config: SeedConfig, seed_path: str) -> tuple[bool, str]:
@@ -32,14 +32,6 @@ def validate_seed_structure(config: SeedConfig, seed_path: str) -> tuple[bool, s
         - If valid: (True, "")
         - If invalid: (False, "description of error")
     """
-    # Scenarios that intentionally have duplicate IDs (testing edge cases)
-    ALLOW_DUPLICATE_IDS = [
-        "conflicting_duplicate_id_robustness",
-        "duplicate_arrival_idempotency",
-    ]
-
-    # Check if this scenario allows duplicate IDs
-    allow_duplicates = any(scenario in seed_path for scenario in ALLOW_DUPLICATE_IDS)
     # Check horizon is positive
     if config.horizon <= 0:
         return False, f"Invalid horizon: {config.horizon}"
@@ -74,10 +66,7 @@ def validate_seed_structure(config: SeedConfig, seed_path: str) -> tuple[bool, s
 
                 task_id = task["id"]
 
-                # Check for duplicate IDs (unless scenario allows them)
-                if not allow_duplicates:
-                    if task_id in task_ids:
-                        return False, f"Duplicate task ID: {task_id}"
+                # Duplicate task IDs are now allowed (handled with UUIDs internally)
                 task_ids.add(task_id)
 
                 # Check deadline
@@ -209,14 +198,7 @@ def pytest_generate_tests(metafunc):
         loader = ScenarioLoader(scenarios_dir)
         scenario_types = loader.list_scenario_types()
 
-        # Edge-case scenarios that intentionally fail strict validation
-        edge_case_scenarios = {
-            "conflicting_duplicate_id_robustness",
-            "duplicate_arrival_idempotency",
-        }
-
         test_cases = []
-        marks_list = []
 
         for scenario_type in scenario_types:
             seeds = loader.list_scenarios(scenario_type)
@@ -227,23 +209,8 @@ def pytest_generate_tests(metafunc):
                     seed_num = seed_name.split("_")[-1]
                     test_cases.append((scenario_type, seed_num))
 
-                    # Mark edge cases as expected failures
-                    if scenario_type in edge_case_scenarios:
-                        marks_list.append(
-                            pytest.param(
-                                scenario_type,
-                                seed_num,
-                                marks=pytest.mark.xfail(
-                                    reason="Edge-case scenario with intentional duplicate IDs",
-                                    strict=True,
-                                ),
-                            )
-                        )
-                    else:
-                        marks_list.append((scenario_type, seed_num))
-
-        # Parameterize the test with marks
-        metafunc.parametrize("scenario_type,seed_num", marks_list)
+        # Parameterize the test (duplicates are now handled with UUIDs, so all should pass)
+        metafunc.parametrize("scenario_type,seed_num", test_cases)
 
 
 def test_validate_all_seeds_summary(scenarios_path):
@@ -300,32 +267,6 @@ def test_validate_all_seeds_summary(scenarios_path):
 
     print("=" * 70 + "\n")
 
-    # Special edge-case scenarios that intentionally have duplicate IDs
-    # These test robustness but fail strict validation
-    expected_edge_cases = {
-        "conflicting_duplicate_id_robustness",
-        "duplicate_arrival_idempotency",
-    }
-
-    # Separate edge cases from actual errors
-    edge_case_failures = [
-        (path, error)
-        for path, error in invalid_seeds
-        if any(edge_case in str(path) for edge_case in expected_edge_cases)
-    ]
-    actual_failures = [
-        (path, error)
-        for path, error in invalid_seeds
-        if not any(edge_case in str(path) for edge_case in expected_edge_cases)
-    ]
-
-    if edge_case_failures:
-        print(f"\n⚠️  Edge-case scenarios (intentionally malformed): {len(edge_case_failures)}")
-        for path, error in edge_case_failures:
-            print(f"  - {path.name}: {error}")
-
-    # Assert no actual failures (edge cases are expected)
-    assert len(actual_failures) == 0, f"Found {len(actual_failures)} unexpected failures"
-    assert valid_seeds == (total_seeds - len(edge_case_failures)), (
-        f"Expected {total_seeds - len(edge_case_failures)} valid seeds, got {valid_seeds}"
-    )
+    # All seeds should be valid (duplicates are handled with UUIDs internally)
+    assert len(invalid_seeds) == 0, f"Found {len(invalid_seeds)} invalid seeds"
+    assert valid_seeds == total_seeds, f"Expected {total_seeds} valid seeds, got {valid_seeds}"

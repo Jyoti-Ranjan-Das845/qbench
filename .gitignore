@@ -53,3 +53,12 @@ Thumbs.db
 
 # uv
 .uv/
+
+# QBench generated files
+qbench_results_*.json
+results/
+test_*.json
+*.result.json
+
+# Examples to exclude
+examples/gpt-5.2-react/

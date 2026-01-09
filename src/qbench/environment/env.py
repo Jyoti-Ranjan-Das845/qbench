@@ -2,10 +2,10 @@
 
 from copy import deepcopy
 
-from qbench.action import Action
-from qbench.loader import SeedConfig
-from qbench.observation import Observation, ScheduledTask
-from qbench.task import Task
+from qbench.data_models.action import Action
+from qbench.environment.loader import SeedConfig
+from qbench.data_models.observation import Observation, ScheduledTask
+from qbench.data_models.task import Task
 
 
 class QueueEnv:
@@ -50,6 +50,42 @@ class QueueEnv:
         self.current_completions: list[str] = []
         self.current_misses: list[str] = []
 
+    def find_task_by_id(
+        self, task_id: str, status_set: set[str] | None = None
+    ) -> tuple[Task | None, str | None]:
+        """
+        Find first task with given original ID (FIFO if duplicates exist).
+
+        Args:
+            task_id: Original task ID (what agent sees)
+            status_set: Optional set of UIDs to search in (e.g., self.pending)
+
+        Returns:
+            (task, uid) if found, (None, None) otherwise
+        """
+        search_space = status_set if status_set is not None else self.tasks.keys()
+
+        for uid in search_space:
+            task = self.tasks.get(uid)
+            if task and task.id == task_id:
+                return task, uid
+
+        return None, None
+
+    def get_uid(self, task_id: str, status_set: set[str] | None = None) -> str | None:
+        """
+        Get internal UID for given original task ID (FIFO if duplicates).
+
+        Args:
+            task_id: Original task ID (what agent sees)
+            status_set: Optional set of UIDs to search in
+
+        Returns:
+            UID if found, None otherwise
+        """
+        _, uid = self.find_task_by_id(task_id, status_set)
+        return uid
+
     def reset(self) -> Observation:
         """
         Reset environment to initial state and inject step 0 events.
@@ -80,9 +116,9 @@ class QueueEnv:
         self._inject_events(0)
 
         # Build and return initial observation
-        return self._build_observation()
+        return self.observe()
 
-    def step(self, actions: list[Action]) -> tuple[Observation, bool]:
+    def act(self, actions: list[Action]) -> tuple[Observation, bool]:
         """
         Apply Purple agent actions and advance time by one step.
 
@@ -127,7 +163,7 @@ class QueueEnv:
             self._inject_events(self.time)
 
         # Build observation
-        obs = self._build_observation()
+        obs = self.observe()
 
         return obs, done
 
@@ -157,30 +193,29 @@ class QueueEnv:
                     deadline=task_data["deadline"],
                     status="pending",
                 )
-                self.tasks[task.id] = task
-                self.pending.add(task.id)
+                self.tasks[task.uid] = task
+                self.pending.add(task.uid)
                 self.current_arrivals.append(task)
 
             elif event.type == "cancel" and event.task_id:
                 # External cancellation (not agent-initiated)
                 task_id = event.task_id
-                if task_id in self.tasks:
-                    task = self.tasks[task_id]
-
+                task, uid = self.find_task_by_id(task_id)
+                if task and uid:
                     # Remove from current status set
-                    if task_id in self.pending:
-                        self.pending.remove(task_id)
-                    elif task_id in self.scheduled:
-                        self.scheduled.remove(task_id)
+                    if uid in self.pending:
+                        self.pending.remove(uid)
+                    elif uid in self.scheduled:
+                        self.scheduled.remove(uid)
                         # Remove from schedule
                         if task.scheduled_slot is not None:
                             slot = task.scheduled_slot
-                            if slot in self.schedule and task_id in self.schedule[slot]:
-                                self.schedule[slot].remove(task_id)
+                            if slot in self.schedule and uid in self.schedule[slot]:
+                                self.schedule[slot].remove(uid)
 
                     # Mark as cancelled
                     task.status = "cancelled"
-                    self.cancelled.add(task_id)
+                    self.cancelled.add(uid)
                     self.current_cancellations.append(task_id)
 
             elif event.type == "capacity_change" and event.new_capacity is not None:
@@ -202,11 +237,12 @@ class QueueEnv:
 
         task_id = action.task_id
 
-        # Skip if task doesn't exist or is not in valid state
-        if task_id not in self.tasks:
-            return
+        # Find task by original ID (FIFO if duplicates)
+        task, uid = self.find_task_by_id(task_id)
 
-        task = self.tasks[task_id]
+        # Skip if task doesn't exist
+        if not task or not uid:
+            return
 
         if action.type == "schedule":
             if task.status == "pending" and action.step is not None:
@@ -215,34 +251,34 @@ class QueueEnv:
                 task.scheduled_slot = action.step
 
                 # Update state sets
-                self.pending.discard(task_id)
-                self.scheduled.add(task_id)
+                self.pending.discard(uid)
+                self.scheduled.add(uid)
 
                 # Add to schedule
                 if action.step not in self.schedule:
                     self.schedule[action.step] = []
-                self.schedule[action.step].append(task_id)
+                self.schedule[action.step].append(uid)
 
         elif action.type == "reschedule":
             if task.status == "scheduled" and action.step is not None:
                 # Remove from old slot
                 old_slot = task.scheduled_slot
                 if old_slot is not None and old_slot in self.schedule:
-                    if task_id in self.schedule[old_slot]:
-                        self.schedule[old_slot].remove(task_id)
+                    if uid in self.schedule[old_slot]:
+                        self.schedule[old_slot].remove(uid)
 
                 # Add to new slot
                 task.scheduled_slot = action.step
                 if action.step not in self.schedule:
                     self.schedule[action.step] = []
-                self.schedule[action.step].append(task_id)
+                self.schedule[action.step].append(uid)
 
         elif action.type == "reject":
             if task.status == "pending":
                 # Reject the task (only valid for routine tasks)
                 task.status = "rejected"
-                self.pending.discard(task_id)
-                self.rejected.add(task_id)
+                self.pending.discard(uid)
+                self.rejected.add(uid)
 
         elif action.type == "cancel":
             # Agent-initiated cancellation
@@ -250,13 +286,13 @@ class QueueEnv:
                 # Remove from schedule
                 if task.scheduled_slot is not None:
                     slot = task.scheduled_slot
-                    if slot in self.schedule and task_id in self.schedule[slot]:
-                        self.schedule[slot].remove(task_id)
+                    if slot in self.schedule and uid in self.schedule[slot]:
+                        self.schedule[slot].remove(uid)
 
                 # Mark as cancelled
                 task.status = "cancelled"
-                self.scheduled.discard(task_id)
-                self.cancelled.add(task_id)
+                self.scheduled.discard(uid)
+                self.cancelled.add(uid)
 
     def _process_completions(self) -> None:
         """
@@ -267,16 +303,16 @@ class QueueEnv:
         if self.time not in self.schedule:
             return
 
-        for task_id in self.schedule[self.time][:]:  # Copy list to avoid modification issues
-            if task_id in self.tasks:
-                task = self.tasks[task_id]
+        for uid in self.schedule[self.time][:]:  # Copy list to avoid modification issues
+            if uid in self.tasks:
+                task = self.tasks[uid]
                 if task.status == "scheduled":
                     task.status = "completed"
                     task.completed_time = self.time
 
-                    self.scheduled.discard(task_id)
-                    self.completed.add(task_id)
-                    self.current_completions.append(task_id)
+                    self.scheduled.discard(uid)
+                    self.completed.add(uid)
+                    self.current_completions.append(task.id)
 
     def _mark_deadline_misses(self) -> None:
         """
@@ -286,30 +322,30 @@ class QueueEnv:
         exceeds their deadline.
         """
         # Check pending tasks
-        for task_id in list(self.pending):  # Copy to avoid modification during iteration
-            task = self.tasks[task_id]
+        for uid in list(self.pending):  # Copy to avoid modification during iteration
+            task = self.tasks[uid]
             if self.time > task.deadline:
                 task.status = "missed"
-                self.pending.remove(task_id)
-                self.missed.add(task_id)
-                self.current_misses.append(task_id)
+                self.pending.remove(uid)
+                self.missed.add(uid)
+                self.current_misses.append(task.id)
 
         # Check scheduled tasks
-        for task_id in list(self.scheduled):
-            task = self.tasks[task_id]
+        for uid in list(self.scheduled):
+            task = self.tasks[uid]
             if self.time > task.deadline:
                 # Remove from schedule
                 if task.scheduled_slot is not None:
                     slot = task.scheduled_slot
-                    if slot in self.schedule and task_id in self.schedule[slot]:
-                        self.schedule[slot].remove(task_id)
+                    if slot in self.schedule and uid in self.schedule[slot]:
+                        self.schedule[slot].remove(uid)
 
                 task.status = "missed"
-                self.scheduled.remove(task_id)
-                self.missed.add(task_id)
-                self.current_misses.append(task_id)
+                self.scheduled.remove(uid)
+                self.missed.add(uid)
+                self.current_misses.append(task.id)
 
-    def _build_observation(self) -> Observation:
+    def observe(self) -> Observation:
         """
         Build the current observation snapshot for the Purple agent.
 
@@ -317,13 +353,13 @@ class QueueEnv:
             Observation containing current state and events
         """
         # Get all pending tasks
-        pending_tasks = [self.tasks[tid] for tid in self.pending]
+        pending_tasks = [self.tasks[uid] for uid in self.pending]
 
         # Get all scheduled tasks
         scheduled_tasks = [
-            ScheduledTask(task=self.tasks[tid], slot=self.tasks[tid].scheduled_slot or 0)
-            for tid in self.scheduled
-            if self.tasks[tid].scheduled_slot is not None
+            ScheduledTask(task=self.tasks[uid], slot=self.tasks[uid].scheduled_slot or 0)
+            for uid in self.scheduled
+            if self.tasks[uid].scheduled_slot is not None
         ]
 
         return Observation(

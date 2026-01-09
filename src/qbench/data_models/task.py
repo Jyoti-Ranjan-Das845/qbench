@@ -1,6 +1,7 @@
 """Task data model for QBench."""
 
 from typing import Literal
+from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
@@ -14,6 +15,7 @@ class Task(BaseModel):
     """
 
     id: str = Field(description="Unique identifier for the task")
+    uid: str = Field(default_factory=lambda: str(uuid4()), exclude=True, description="Internal unique identifier (framework use only)")
     arrival_time: int = Field(ge=0, description="Time step when task arrives")
     priority: Literal["urgent", "routine"] = Field(description="Task priority level")
     deadline: int = Field(ge=0, description="Latest step by which task must complete")

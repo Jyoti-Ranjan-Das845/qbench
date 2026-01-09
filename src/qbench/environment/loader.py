@@ -118,7 +118,6 @@ class ScenarioLoader:
                 raise ValueError(f"Event scheduled at step {step} but horizon is {config.horizon}")
 
         # Check all task deadlines are valid
-        task_ids = set()
         for events_list in config.events.values():
             for event in events_list:
                 if event.type == "arrival" and event.task:
@@ -126,10 +125,8 @@ class ScenarioLoader:
                     deadline = event.task.get("deadline")
                     arrival_time = event.task.get("arrival_time")
 
-                    # Check for duplicate task IDs
-                    if task_id in task_ids:
-                        raise ValueError(f"Duplicate task ID: {task_id}")
-                    task_ids.add(task_id)
+                    # Note: Duplicate task IDs are allowed for robustness testing
+                    # Framework uses internal _uid to distinguish tasks
 
                     # Check deadline is within horizon
                     if deadline is not None and deadline >= config.horizon:
@@ -151,7 +148,7 @@ class ScenarioLoader:
             scenario_type: Optional scenario type subdirectory to filter by
 
         Returns:
-            List of paths to seed files
+            List of paths to seed files (relative to scenarios_dir)
         """
         if scenario_type:
             search_dir = self.scenarios_dir / scenario_type
@@ -162,7 +159,9 @@ class ScenarioLoader:
 
         # Find all .json files recursively
         seed_files = list(search_dir.rglob("*.json"))
-        return sorted(seed_files)
+        # Make paths relative to scenarios_dir to avoid double-prefixing
+        relative_files = [f.relative_to(self.scenarios_dir) for f in seed_files]
+        return sorted(relative_files)
 
     def list_scenario_types(self) -> list[str]:
         """

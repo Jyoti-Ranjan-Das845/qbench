@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from qbench import Action, QueueEnv, ScenarioLoader
+from qbench.data_models.action import Action
+from qbench.environment.env import QueueEnv
+from qbench.environment.loader import ScenarioLoader
 
 
 @pytest.fixture
@@ -45,7 +47,7 @@ def test_run_no_traffic_scenario(scenarios_path):
     done = False
     steps = 0
     while not done:
-        obs, done = env.step([Action(type="noop")])
+        obs, done = env.act([Action(type="noop")])
         steps += 1
 
         # Safety check
@@ -85,7 +87,7 @@ def test_run_late_burst_scenario(scenarios_path):
             action = Action(type="schedule", task_id=task.id, step=obs.time + 1)
             actions.append(action)
 
-        obs, done = env.step(actions)
+        obs, done = env.act(actions)
         step += 1
 
         if step > 25:

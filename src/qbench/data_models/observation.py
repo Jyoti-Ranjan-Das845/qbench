@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 
-from qbench.task import Task
+from qbench.data_models.task import Task
 
 
 class ScheduledTask(BaseModel):

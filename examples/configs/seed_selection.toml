@@ -1,0 +1,44 @@
+# QBench Seed Selection Configuration
+#
+# This demonstrates how to select specific scenarios and seeds for testing.
+# Useful for:
+# - Testing reproducibility with specific seeds
+# - Focusing on particular challenge types
+# - Quick validation during development
+#
+# Run with: qbench eval --config examples/configs/seed_selection.toml
+
+[agents]
+purple_agent_url = "http://localhost:9019"
+green_agent_port = 9018
+
+[evaluation]
+# Test only 3 specific scenario types
+scenarios = [
+    "backlog_cap_stability_guard",
+    "cold_start_to_surge",
+    "urgent_flood"
+]
+
+# Use only seed 1 for faster testing
+# Each scenario has 3 seed variants - this runs 3 scenarios × 1 seed = 3 episodes
+seeds = [1]
+
+# Parallel execution is fine with fewer episodes
+parallel = 3
+
+timeout = 300
+
+[output]
+output_file = "results/seed_selection_results.json"
+verbose = true  # Show detailed logs for debugging
+quiet = false
+
+# Notes:
+# - Seeds are numbered 1, 2, 3 (corresponding to seed_1.json, seed_2.json, seed_3.json)
+# - You can specify seeds as: [1], [1,2], or [1,2,3]
+# - Scenario names can be:
+#     - Full names: "backlog_cap_stability_guard"
+#     - Partial matches: "backlog_cap" (must be unique)
+#     - First N: "5" (runs first 5 scenarios)
+#     - Range: "1-10" (runs scenarios 1 through 10)

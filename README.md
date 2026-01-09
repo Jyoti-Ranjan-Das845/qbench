@@ -1,7 +1,7 @@
 <div align="center">
 
   <!-- Hero Banner -->
-  <img src="assets/logo.png" alt="QBench" width="100%"/>
+  <img src="assets/logo.png?v=2" alt="QBench" width="100%"/>
 
   <h2>🎯 Queue Management Benchmark for AI Agents</h2>
 

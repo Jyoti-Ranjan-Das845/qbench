@@ -62,3 +62,4 @@ test_*.json
 
 # Examples to exclude
 examples/gpt-5.2-react/
+.env

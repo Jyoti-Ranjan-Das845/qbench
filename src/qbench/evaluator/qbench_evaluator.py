@@ -51,7 +51,8 @@ class QBenchEvaluator(GreenAgent):
             requests_per_minute: (Deprecated) Rate limit in requests per minute (default: 50 RPM)
             batch_size: (Deprecated) Number of scenario types to process per batch (default: 15)
         """
-        self._required_roles = ["agent"]  # The purple agent being tested
+        # No hardcoded role requirement - accept any participant role name
+        # This allows purple agent builders to use any name they want
         self._scenarios_dir = scenarios_dir
         self._loader = ScenarioLoader(scenarios_dir)
         self._parallel = parallel
@@ -73,9 +74,12 @@ class QBenchEvaluator(GreenAgent):
         Returns:
             Tuple of (is_valid, message)
         """
-        missing_roles = set(self._required_roles) - set(request.participants.keys())
-        if missing_roles:
-            return False, f"Missing required roles: {missing_roles}"
+        # QBench requires exactly one purple agent participant (any role name is acceptable)
+        num_participants = len(request.participants)
+        if num_participants == 0:
+            return False, "No participants provided. QBench requires exactly one purple agent."
+        if num_participants > 1:
+            return False, f"Too many participants ({num_participants}). QBench requires exactly one purple agent."
         return True, "ok"
 
     async def run_eval(self, req: EvalRequest, updater: TaskUpdater, agent_override=None) -> None:
@@ -100,9 +104,11 @@ class QBenchEvaluator(GreenAgent):
         max_episodes = req.config.get("max_episodes", None)
         send_task_prompt = req.config.get("send_task_prompt", True)
 
-        # Get the purple agent URL
-        agent_url = str(req.participants["agent"])
+        # Get the purple agent URL (accept any role name)
+        participant_role = list(req.participants.keys())[0]
+        agent_url = str(req.participants[participant_role])
 
+        logger.info(f"Purple agent role: {participant_role}")
         logger.info(f"Purple agent URL: {agent_url}")
         logger.info(f"Scenario types: {scenario_types}")
         logger.info(f"Seeds: {seeds}")

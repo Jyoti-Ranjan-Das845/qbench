@@ -9,6 +9,20 @@ from typing import Dict, Any, Optional
 logger = logging.getLogger("qbench.client.a2a")
 
 
+# Import httpx early for DEFAULT_TIMEOUT
+try:
+    import httpx
+    DEFAULT_TIMEOUT = httpx.Timeout(
+        connect=30.0,   # 30 seconds to connect
+        read=None,      # No timeout - allow unlimited time for full benchmark completion
+        write=30.0,     # 30 seconds to write request
+        pool=30.0       # 30 seconds to get connection from pool
+    )
+except ImportError:
+    # Will be caught later in send_eval_request
+    DEFAULT_TIMEOUT = 120.0
+
+
 async def send_eval_request(
     green_agent_url: str,
     purple_agent_url: str,
@@ -77,7 +91,7 @@ async def send_eval_request(
     }
 
     # Get agent card
-    async with httpx.AsyncClient(timeout=120.0) as httpx_client:
+    async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as httpx_client:
         try:
             resolver = A2ACardResolver(httpx_client=httpx_client, base_url=green_agent_url)
             agent_card = await resolver.get_agent_card()

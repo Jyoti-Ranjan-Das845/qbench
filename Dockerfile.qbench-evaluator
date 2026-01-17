@@ -1,0 +1,26 @@
+# Dockerfile for QBench Evaluator (Green Agent)
+# Multi-arch compatible - use buildx to specify target platform
+# GitHub Actions: docker buildx build --platform linux/amd64
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Copy project files
+COPY src/ /app/src/
+COPY scenarios/ /app/scenarios/
+COPY pyproject.toml uv.lock README.md /app/
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Install uv and dependencies
+RUN pip install uv && uv sync --frozen
+
+# Expose port (AgentBeats standard)
+EXPOSE 8080
+
+# Set entrypoint
+ENTRYPOINT ["uv", "run", "python", "-m", "qbench.evaluator.qbench_evaluator"]
+
+# Default arguments (override code default of 9009 → 8080 for container)
+CMD ["--host", "0.0.0.0", "--port", "8080"]

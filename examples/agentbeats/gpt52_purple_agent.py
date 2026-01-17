@@ -166,7 +166,17 @@ def kill_process_on_port(port: int) -> None:
 
 def main():
     """Run the GPT-5.2 purple agent server."""
-    PORT = 9019
+    import argparse
+
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="GPT-5.2 Purple Agent for QBench")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind the server")
+    parser.add_argument("--port", type=int, default=9019, help="Port to bind the server")
+    parser.add_argument("--card-url", type=str, help="Agent card URL (optional, for compatibility)")
+    args = parser.parse_args()
+
+    PORT = args.port
+    HOST = args.host
 
     # Kill any existing process on this port
     kill_process_on_port(PORT)
@@ -181,7 +191,8 @@ def main():
     )
 
     # Create agent card
-    card = create_agent_card(f"http://localhost:{PORT}")
+    # Use HOST:PORT for agent card URL (works in Docker and locally)
+    card = create_agent_card(f"http://{HOST}:{PORT}")
 
     # Create app
     a2a_app = A2AStarletteApplication(
@@ -192,12 +203,12 @@ def main():
     # Build the Starlette app
     app = a2a_app.build()
 
-    print(f"Starting GPT-5.2 purple agent on port {PORT}...")
-    print(f"Agent URL: http://localhost:{PORT}")
+    print(f"Starting GPT-5.2 purple agent on {HOST}:{PORT}...")
+    print(f"Agent URL: http://{HOST}:{PORT}")
     print(f"Model: {executor.model}, Temperature: {executor.temperature}")
 
     # Run server
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+    uvicorn.run(app, host=HOST, port=PORT)
 
 
 if __name__ == "__main__":
